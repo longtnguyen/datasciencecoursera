@@ -1,0 +1,772 @@
+---
+title: "r4ds_explore_exercises"
+author: "Long Nguyen"
+date: "8/31/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(nycflights13)
+library(tidyverse)
+```
+##3.2.4
+
+###1
+Running ggplot(data = mpg):
+```{r mpg}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy))
+```
+
+###2
+There are 234 rows and 11 columns in mpg
+```{r mpg2}
+dim(mpg)
+```
+###3
+drv stand for which type of drive the car have (drv: f = front-wheel drive, r = rear wheel drive, 4 = 4wd)
+
+###4
+Scatterplot for hwy vs cyl
+```{r hwy cyl}
+ggplot(data = mpg) + geom_point(mapping = aes(x = hwy, y = cyl))
+```
+###5
+Scatterplot for class vs drv is not useful because they are both categorical, the scatterplot doesn't really show any important relationship
+```{r class drv}
+ggplot(data = mpg) + geom_point(mapping = aes(x = class, y = drv))
+```
+##3.3.1
+###1
+color = "blue" has to be outside of aes, the correct code is as follow:
+```{r color}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy), color = "blue")
+```
+###2
+manufacturer, model, trans, drv, fl, class are categorical; displ, year, cyl, cty, hwy are continuous. Categorical is labeled as <chr> and continuous are <dbl> or <int>
+
+###3
+See below
+```{r color 2}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = displ))
+```
+```{r size 2}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, size = cty))
+```
+Shape cannot be mapped to continuous variable
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, shape = cyl)) return an error
+
+Continuous is displayed in a spectrum, categorical get grouped into different categories
+
+###4
+Both get displayed and have their own legend
+```{r multiple}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color= cty, size = cty))
+
+```
+###5
+Stroke dictates shape border, we can only see border width change on shape with border so 0-24 excluding 15-20
+```{r stroke}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy), stroke = 2, shape = 0)
+```
+###6
+This put in a conditional that separate the dot between true and false after evaluating the conditional
+```{r conditional}
+ggplot(data = mpg) + geom_point(mapping = aes(x = displ, y = hwy, color = displ < 5))
+```
+
+##3.5.1
+###1
+It separate the facets base on each different value, probably is not a good idea
+```{r facet}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl)) +
+  facet_wrap(~ displ)
+```
+
+###2
+Empty cells mean there is no data in that coordinate. The graph are similar in a way that the data are spare and only a single data point in a facet
+```{r facet 2}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = drv, y = cyl)) +
+  facet_grid(drv ~ cyl)
+```
+###3
+```{r dot 1}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(drv ~ .)
+```
+
+```{r dot 2}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  facet_grid(. ~ cyl)
+```
+The . allow us to create a 1 by N or N by 1 facet instead of an N by N facet
+###4
+```{r facet 3}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+```{r color vs facet}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class))
+```
+
+Facet allow us to separate the data, allow us a better view on individual category. This does make it harder to view a relationship between different category, color might be better in this regard. For larger data set, separate facets might be better as color might overlap each dot due to too many data points
+
+###5
+nrow determine amount of row of facet
+ncol determine amount of column of facet
+other options for individual panel are: as.table, drop, etc...
+facet_grid forms a matrix of panels defined by row and column facetting variables; it doesn't need column or row.
+
+###6
+
+This will allow the facet to extend more vertically(fewer rows) make it easier to view
+
+##3.6.1
+###1
+Line chart - geom_line()
+Boxplot - geom_boxplot()
+Histogram - geom_histogram()
+Area chart - geom_area()
+###2
+It will plot the points and line for each drive type
+
+```{r smooth}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point() + 
+  geom_smooth(se = FALSE)
+```
+###3
+It removes the legends; without this part of the code, the legends will be there. I suppose to make the graph bigger (maybe?)
+
+###4
+se = TRUE show confidence level of the smoothing line
+
+###5
+The two graph are identical because it show the same data with the same setting. One is definitely more concise but both will displace the exact same graph
+
+```{r graph 1}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point() + 
+  geom_smooth()
+```
+
+```{r graph 2}
+ggplot() + 
+  geom_point(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(data = mpg, mapping = aes(x = displ, y = hwy))
+```
+
+###6
+```{r recreate 1}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 4) + 
+  geom_smooth(size = 3, se = FALSE)
+```
+
+```{r recreate 2}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_smooth(size = 3, aes(group = drv), se = FALSE) +
+  geom_point(size = 4)
+```
+```{r recreate 3}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy, color = drv)) + 
+  geom_point(size = 4) + 
+  geom_smooth(size = 3, se = FALSE)
+```
+```{r recreate 4}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 4, aes(color = drv)) + 
+  geom_smooth(size = 3, se = FALSE)
+```
+```{r recreate 5}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 4, aes(color = drv)) +
+  geom_smooth(size = 3, aes(linetype = drv), se = FALSE)
+```
+```{r recreate 6}
+ggplot(data = mpg, mapping = aes(x = displ, y = hwy)) + 
+  geom_point(size = 8, colour = "white") + 
+  geom_point(size = 4,aes(colour = drv))
+```
+
+##3.7.1
+
+###1
+geom_pointrange:
+
+```{r recreate 7}
+ggplot(data = diamonds) + geom_pointrange(mapping = aes(x = cut, y = depth), 
+    stat = "summary",
+    fun.ymin = min,
+    fun.ymax = max,
+    fun.y = median
+  )
+```
+
+###2
+geom_bar doesn't require frequency, it generate its own frequency and plot that; geom_col expects the frequency to be present
+
+###3
+List all geom and stat that are used in concert:
+
+geom_bar geom_col stat_count
+geom_bin2d stat_bin_2d
+geom_boxplot stat_boxplot
+geom_contour stat_contour
+geom_count stat_sum
+geom_density_2d stat_density_2d
+geom_density stat_density
+geom_hex stat_bin_hex
+geom_freqpoly geom_histogram stat_bin
+geom_qq stat_qq
+geom_quantile stat_quantile
+geom_smooth stat_smooth
+geom_violin stat_ydensity
+stat_sf geom_sf coord_sf
+
+###4
+stat_smooth computes:
+y - predicted value
+ymin - lower pointwise confidence interval around the mean
+ymax - upper pointwise confidence interval around the mean
+se - standard error
+
+###5
+the first on missing group = 1 so each type is calculate out of 1, which result in all equal bar
+```{r 3.7.1 5-1}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, y = ..prop..))
+```
+This one is still calculated porportion out of a single group
+```{r 3.7.1 5-2}
+ggplot(data = diamonds) + 
+  geom_bar(mapping = aes(x = cut, fill = color, y = ..prop..))
+```
+##3.8.1
+###1
+The data is rounded, so they overlap each other too much. We need to add position = "jitter"
+```{r jitter}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) + 
+  geom_point(position = "jitter")
+```
+
+###2
+width and height
+
+###3
+Geom_jitter account for fractional value to separate values, geom_count accept the overlap and make the bigger based on frequency of the overlap
+
+###4
+position = dodge is default, position = identity would stack them
+```{r boxplot}
+ggplot(data = mpg, mapping = aes(x = drv, y = hwy, color = trans)) + 
+  geom_boxplot()
+```
+```{r boxplot}
+ggplot(data = mpg, mapping = aes(x = drv, y = hwy, color = trans)) + 
+  geom_boxplot(position="identity")
+```
+
+##3.9.1
+###1
+
+```{r pie chart}
+ggplot(mpg, aes(x = factor(1), fill = drv)) +
+  geom_bar(width = 1) +
+  coord_polar(theta = "y")
+```
+###2
+lab() is used to add label
+###3
+coord_map projects a portion of the earth, which is approximately spherical, onto a flat 2D plane
+coord_quickmap is a quick approximation that does preserve straight lines. It works best for smaller areas closer to the equator.
+###4
+coord_fix force x and y axis to have the same unit
+geom_abline draw a line for comparison 
+```{r abline}
+ggplot(data = mpg, mapping = aes(x = cty, y = hwy)) +
+  geom_point() +
+  geom_abline() +
+  coord_fixed()
+```
+
+##4.4
+
+###1
+The 'i' is different, the name has to match exactly for it to be defined
+
+###2
+"ggplot(dota = mpg) + " needs to be "data" instead of "dota"
+"fliter(mpg, cyl = 8)" need to be "filter" instead of "fliter" and the "=" needs to be "=="
+"filter(diamond, carat > 3)" need to be "diamonds" instead of "diamond"
+
+```{r fix error}
+library(tidyverse)
+
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy))
+
+filter(mpg, cyl == 8)
+filter(diamonds, carat > 3)
+```
+
+###3
+
+Keyboard shortcut keys reference, we can get there through tools menu
+
+##5.2.4
+###1
+1.
+```{r arrival delay}
+filter(flights, arr_delay > 120)
+```
+2.
+```{r Houston}
+filter(flights, dest %in% c("IAH", "HOU"))
+```
+3.
+```{r airlines}
+filter(flights, carrier %in% c("DL", "AA", "UA"))
+```
+4.
+```{r month}
+filter(flights, between(month, 7, 9))
+```
+5.
+```{r delay}
+filter(flights, dep_delay <= 0, arr_delay > 120)
+```
+6.
+```{r delay 2}
+filter(flights, dep_delay >= 60, dep_delay-arr_delay > 30)
+```
+7.
+```{r departure time}
+filter(flights, dep_time <= 600 | dep_time == 2400)
+```
+
+##5.3.1
+
+###1
+```{r arrange}
+arrange(flights, desc(is.na(dep_time)), dep_time)
+```
+
+###2
+most delay is 1301 minutes, least delay is 43 minutes early
+```{r most delay least delay}
+arrange(flights, desc(dep_delay))
+arrange(flights, dep_delay)
+```
+
+###3
+I am not sure if this is asking for velocity or flight time, below are answers for both
+
+```{r fastest}
+arrange(flights, desc(distance/air_time))
+```
+```{r fastest 2}
+arrange(flights, air_time)
+```
+
+###4
+shortest flight is 17 miles but this one seems to be canceled, next shortest is 80, longest is 4983
+```{r shortest}
+arrange(flights, distance)
+```
+```{r longest}
+arrange(flights, desc(distance))
+```
+
+##5.4.1
+
+###1
+```{r select}
+select(flights, dep_time, dep_delay, arr_time, arr_delay)
+select(flights, starts_with("dep"), starts_with("ar"))
+```
+
+###2
+R ignores it and only display once
+```{r select}
+select(flights, dep_time, dep_time, dep_time, arr_delay)
+```
+
+###3
+one_of() function allow us to pass vector into select
+
+```{r one_of}
+vars <- c("year", "month", "day", "dep_delay", "arr_delay")
+select(flights, one_of(vars))
+```
+
+###4
+This code ignore case, we can fix that by adding ignore.case = FALSE
+
+```{r ignore_case}
+select(flights, contains("TIME", ignore.case = FALSE))
+```
+
+##5.5.2
+###1
+```{r convert time}
+convertTime <- function(t) {
+  t %/% 100 * 60 + t %% 100
+}
+transmute(flights,
+          dep_time,
+          dep_time_mins = convertTime(dep_time),
+          sched_dep_time,
+          sched_dep_time_mins = convertTime(sched_dep_time))
+```
+
+###2
+This will not show the same number as arr_time and dep_time are not currently continuous, base 10 arithmatic will be incorrect. Time must be convert to either minutes or hours first.
+
+**Note: I don't think air_time listed by the excercise is accurate; if we look at the first 2 rows: departure are in New York and New Jersey, arrival at Houston, so there is no timezone discrepancy, if we look at the arrival and departure time, we can clearly see that second flight take longer by 4 minutes. Yet air_time say they are the same, that is not correct.
+```{r convert time 2}
+transmute(flights,
+          air_time,
+          arr_time-dep_time, #this is incorrect
+          arr_time,
+          dep_time,
+          origin,
+          dest,
+          air_time_converted = convertTime(arr_time)-convertTime(dep_time))
+```
+
+###3
+dep_time - sched_dep_time should be the same as dep_delay (unless the flight delay into the next day, see page 85)
+```{r dep_delay}
+transmute(flights,
+          dep_delay,
+          dep_delay2 = convertTime(dep_time) - convertTime(sched_dep_time)
+          )
+```
+
+###4
+```{r ranking}
+delay <- mutate(flights, dep_delay_rank = min_rank(-dep_delay))
+delay_filtered <- filter(delay, dep_delay_rank<11)
+arrange(delay_filtered, dep_delay_rank)
+```
+
+###5
+It would be turn into c(1, 2, 3, 1, 2, 3, 1, 2, 3, 1) + c(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) because R make 2 vector the same size before adding
+```{r adding vector}
+1:3 + 1:10
+```
+
+###6
+sin, cos, tan, acos, asin and atan
+
+##5.6.7
+###1
+```{r 15 early/late}
+flights %>%
+  group_by(flight) %>%
+  summarize(early = sum(arr_delay <= -15, na.rm = TRUE) / n(),
+            late = sum(arr_delay >= 15, na.rm = TRUE) / n()) %>%
+  filter(early == 0.5,
+         late == 0.5) %>%
+  select(flight)
+```
+
+```{r  30 early/late}
+flights %>%
+  group_by(flight) %>%
+  summarize(early = sum(arr_delay <= -30, na.rm = TRUE) / n(),
+            late = sum(arr_delay >= 30, na.rm = TRUE) / n()) %>%
+  filter(early == 0.5,
+         late == 0.5) %>%
+  select(flight)
+```
+
+```{r always late 10}
+flights %>%
+  group_by(flight) %>%
+  summarize(late = sum(arr_delay == 10, na.rm = TRUE) / n()) %>%
+  filter(late == 1) %>%
+  select(flight)
+```
+
+```{r always early}
+flights %>%
+  group_by(flight) %>%
+  summarize(early = sum(arr_delay < 0, na.rm = TRUE) / n()) %>%
+  filter(early == 1) %>%
+  select(flight)
+```
+
+```{r always late}
+flights %>%
+  group_by(flight) %>%
+  summarize(early = sum(arr_delay > 0, na.rm = TRUE) / n()) %>%
+  filter(early == 1) %>%
+  select(flight)
+```
+
+###2
+```{r not using count}
+not_cancelled <- flights %>% 
+  filter(!is.na(dep_delay), !is.na(arr_delay))
+#old
+not_cancelled %>%
+  count(dest)
+#new
+not_cancelled %>%
+  group_by(dest) %>%
+  summarize(n = n())
+#old
+not_cancelled %>%
+  count(tailnum, wt = distance)
+#new
+not_cancelled %>%
+  group_by(tailnum) %>%
+  summarize(n = sum(distance, na.rm = TRUE))
+```
+
+###3
+If the flight never take off it cannot arrive, simplify it to !is.na(dep_delay) result in the same filter
+
+###4
+```{r delay cancel}
+cancel_vs_delay <- 
+  flights %>%
+  mutate(cancel = is.na(dep_delay)) %>%
+  group_by(day) %>%
+  summarise(cancelled_flight = mean(cancel),
+            avg_delay = mean(dep_delay, na.rm = TRUE))
+ggplot(cancel_vs_delay, aes(x = avg_delay, cancelled_flight)) +
+  geom_point() +
+  geom_smooth()
+```
+
+###5
+```{r bad airline}
+flights %>%
+  group_by(carrier) %>%
+  summarize(avg_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(desc(avg_delay))
+```
+
+###6
+sort will arrange result from count in descending order
+
+##5.7.1
+###1
+Grouping will perform operation within the group instead of the whole data set
+
+###2
+```{r worst airplane}
+flights %>%
+  group_by(tailnum) %>%
+  summarize(avg_delay = mean(arr_delay, na.rm = TRUE)) %>%
+  arrange(avg_delay)
+```
+
+###3
+```{r best time to flight}
+flights %>%
+  group_by(hour) %>%
+  summarize(delay = sum(arr_delay > 0, na.rm = TRUE) / n()) %>%
+  ggplot(aes(x = hour, y = delay)) +
+  geom_col()
+```
+7 in the morning is the best time to flight for less delay
+
+###4
+```{r delay destination}
+flights %>% 
+  filter(!is.na(arr_delay), arr_delay > 0) %>%  
+  group_by(dest) %>%
+  mutate(total = sum(arr_delay),
+         proportion = arr_delay / sum(arr_delay)) %>%
+  select(flight, dest, total, proportion)
+```
+
+###5
+```{r lag}
+flights %>%
+  group_by(year, month, day) %>%
+  filter(!is.na(dep_delay)) %>%
+  mutate(lag = lag(dep_delay)) %>%
+  filter(!is.na(lag)) %>%
+  ggplot(aes(x = dep_delay, y = lag)) +
+  geom_point() +
+  geom_smooth()
+```
+
+###6
+```{r too fast}
+flights %>%
+  filter(!is.na(air_time)) %>%
+  group_by(dest) %>%
+  mutate(avg = mean(air_time, na.rm=TRUE),
+         fast = (air_time - avg) / avg) %>%
+  arrange(fast) %>%
+  select(air_time, avg, fast)
+```
+
+Boston flight is 46% faster than average, seems wrong
+
+###7
+```{r most carrier}
+flights %>% 
+  group_by(dest, carrier) %>%
+  count(carrier) %>%
+  group_by(carrier) %>%
+  count(sort = TRUE)
+```
+EV fly to the most destination
+
+###8
+```{r trips before delay}
+flights %>%
+  arrange(tailnum, year, month, day) %>%
+  group_by(tailnum) %>%
+  mutate(delay = dep_delay > 60) %>%
+  mutate(before_delay = cumsum(delay)) %>%
+  filter(before_delay < 1) %>%
+  count(sort = TRUE)
+```
+
+##6.3.2
+###2
+Report missing argument, missing white space and other warning
+
+##7.3.4
+###1
+```{r diamond x y z}
+ggplot(diamonds, aes(x)) +
+  geom_histogram()
+ggplot(diamonds, aes(y)) +
+  geom_histogram()
+ggplot(diamonds, aes(z)) +
+  geom_histogram()
+```
+I would guess that x is length, y is width and z is depth
+
+###2
+```{r diamond price}
+ggplot(diamonds, aes(price)) +
+  geom_histogram(binwidth = 100) +
+  coord_cartesian(xlim = c(0, 2000), ylim = c(0, 5000))
+```
+there seems to be an abrupt lack of diamond at certain price (1500) and quite of bit of diamond with another price at 750
+
+###3
+```{r carat}
+diamonds %>%
+  filter(carat >= 0.99, carat <= 1) %>%
+  count(carat)
+```
+23 vs 1558. I suppose 1 carat is much more valuable than .99
+
+###4
+coord_cartesian only zoom without droping any value. xlim and ylim will drop value outside the range; binwidth unset divide the data up evenly into 5 bars, it will still show full bar
+
+##7.4.1
+###1
+In histogram, missing value is removed; in bar chart, it becomes its own territory (NA)
+###2
+Remove NA values
+
+##7.5.1.1
+###1
+```{r improve chart}
+flights %>% 
+  mutate(
+    cancelled = is.na(dep_time),
+    sched_hour = sched_dep_time %/% 100,
+    sched_min = sched_dep_time %% 100,
+    sched_dep_time = sched_hour + sched_min / 60
+  ) %>% 
+  ggplot() +
+    geom_boxplot(mapping = aes(y = sched_dep_time, x = cancelled))
+```
+This make more sense to distinguish category
+
+###2
+The size of the diamond should correlate with price
+```{r diamond size price}
+ggplot(diamonds, aes(carat, price)) +
+  geom_point() +
+  geom_smooth()
+```
+
+###3
+###4
+I cannot install ggstance or lvplot, library(ggstance) and library(lvplot) cannot find the package
+
+###5
+geom_freqpoly is the clearest, showing different colored for each type; it is easier to see trend with geom_histogram and geom_violin.
+
+###6
+geom_quasirandom produce a plot that look similar to jitter
+geom_beeswarm produce a plot that is similar to violin but offseted
+
+##7.5.2.1
+###1
+We can group by color and mutate to show proportion
+```{r cut in color}
+diamonds %>% 
+  count(color, cut) %>%  
+  group_by(color) %>%
+  mutate(proportion = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = proportion))
+```
+
+```{r color in cut}
+diamonds %>% 
+  count(color, cut) %>%  
+  group_by(cut) %>%
+  mutate(proportion = n / sum(n)) %>%
+  ggplot(mapping = aes(x = color, y = cut)) +
+    geom_tile(mapping = aes(fill = proportion))
+```
+###2
+```{r geom_tile}
+flights %>%
+  group_by(month, dest) %>%
+  ggplot(aes(x = factor(month), y = dest, fill = dep_delay)) +
+  geom_tile()
+```
+This graph is too bunch up, cannot read the left side, we need to separate it into better category
+
+###3
+Because there are more value in X, putting color on X make it clearer to see
+
+##7.5.3.1
+
+###1
+It is possible to use cut_width but then the bin for diamonds on the right would be hard to see
+
+###2
+```{r price boxplot}
+ggplot(diamonds, aes(x = cut_number(price, 10), y = carat)) +
+  geom_boxplot() +
+  coord_flip()
+```
+###3
+There are more variety of bigger diamond than smaller, this is not surprising as bigger diamond allow it to be cut into more different cut
+
+###4
+```{r visualize}
+ggplot(diamonds, aes(x = cut_number(carat, 10), y = price, color = cut)) +
+  geom_boxplot()+
+  coord_flip()
+```
+
+###5
+The bin only show min and max value, it does not show exactly the distribution of the outlier, which could be interesting to observe.
+

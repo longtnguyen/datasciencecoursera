@@ -1,0 +1,103 @@
+---
+title: "r4ds_wrangle_exercises_10-11"
+author: "Long Nguyen"
+date: "10/2/2017"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+## 10.5
+
+###1
+Tibbles print out less data than what is shown, tibble will also show type like dbl
+###2
+data.frame will function like autocomplete, where `df$x` will result in `df$xyz` which can select the wrong column in some case
+tibble is more explicit
+###3
+We need to use df[[var]] here because df$var will look for column called var
+###4
+```{r annoying}
+annoying <- tibble(
+  `1` = 1:10,
+  `2` = `1` * 2 + rnorm(length(`1`))
+)
+annoying$`1`
+ggplot(annoying, aes(x = `1`, y = `2`)) +
+  geom_point()
+annoying$`3` <- annoying$`2` / annoying$`1`
+annoying <- rename(annoying, one = `1`, two = `2`, three = `3`)
+annoying$`three`
+annoying$`two`
+annoying$`one`
+```
+###5
+This function convert a vector to a data frame
+###6
+n_extra inside print.tbl_df control the extra columns
+##11.2.2
+###1
+read_delim()
+###2
+They have: file, col_names, col_types, locale, na, comment, trim_ws, skip, n_max, guess_max, progress
+###3
+col_positions, without this we have no idea where the column end
+###4
+```{r read_delim}
+read_delim("x,y\n1,'a,b'" , ",", quote = "'")
+```
+###5
+```{r identify error}
+read_csv("a,b\n1,2,3\n4,5,6")
+#There are only 2 column a and b but each row that follow has 3, last column is missing
+read_csv("a,b,c\n1,2\n1,2,3,4")
+#There are 3 column but again the column in the data doesn't match the number of column
+read_csv("a,b\n\"1")
+#There is an extra " 
+read_csv("a,b\n1,2\na,b")
+#There is a mix of number and string in the data, the column type become string
+read_csv("a;b\n1;3")
+#Use , instead of ; for read_csv
+```
+
+##11.3.5
+###1
+I think encoding is most important because it dictate how locale is read
+###2
+It will throw error if decimal mark and group mark are set to the same
+If decimal mark is set to , the group mark is set to .
+If decimal mark is set to . the group mark is set to ,
+###3
+Different place can have different date/time format, these options tell use how to parse them
+###4
+###5
+read_csv2 use ; instead of ,
+###6
+UTF-8 seems to be the current standard
+For Asia, Japanese and Chinese has their own script. Vietnamese have ISO standard
+###7
+```{r parse date}
+d1 <- "January 1, 2010"
+parse_date(d1, "%B %d, %Y")
+d2 <- "2015-Mar-07"
+parse_date(d2, "%Y-%b-%D")
+d3 <- "06-Jun-2017"
+parse_date(d3, "%D-%b-%Y")
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+parse_date(d4, "%B %d (%Y)")
+d5 <- "12/30/14" # Dec 30, 2014
+parse_date(d5, "%m/%d/%y")
+t1 <- "1705"
+parse_time(t1, "%H%M")
+t2 <- "11:15:10.12 PM"
+parse_time(t2)
+```
+
+
+
+
