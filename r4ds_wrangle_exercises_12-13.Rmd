@@ -1,0 +1,274 @@
+---
+title: "r4ds_wrangle_exercises_12-13"
+author: "Long Nguyen"
+date: "10/9/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("babynames")
+install.packages("nasaweather")
+install.packages("fueleconomy")
+install.packages("maps")
+library("maps")
+library("fueleconomy")
+library("nasaweather")
+library("babynames")
+library(tidyverse)
+library("nycflights13")
+```
+##12.2.2.1  
+###1  
+Table 1 has year, country, with variable cases and population
+Table 2 has year, country, cases and population are combined to one column, there is a numeric count variable
+Table 3 has year, country, cases and population represented by rate (cases/population)
+Table 4a and 4b are split into year, country; 4a has cases and 4b has population
+  
+###2   
+```{r tidy}
+#table2
+cases <- filter(table2, type == "cases")[["count"]]
+country <- filter(table2, type == "cases")[["country"]]
+year <- filter(table2, type == "cases")[["year"]]
+population <- filter(table2, type == "population")[["count"]]
+table2_tidy <- tibble(country,
+       year,
+       rate = cases * 10000 / population )
+table2_tidy
+```
+
+```{r combine}
+tibble(country = table4a[["country"]],
+       `1999` = table4a[["1999"]] / table4b[["1999"]] * 10000,
+       `2000` = table4a[["2000"]] / table4b[["2000"]] * 10000)
+```
+
+A combination of 4a and 4b requires less operation to get to the result and easier to read
+
+###3  
+We need to isolate the row that represent each of the cases:
+
+```{r cases}
+table2 %>% 
+  filter(type == "cases") %>%
+  ggplot(aes(year, count)) + 
+  geom_line(aes(group = country), colour = "grey50") + 
+  geom_point(aes(colour = country))
+```
+##12.3.3  
+###1  
+After executing gather(), numeric value is convert to character so the column type will change after spread-gather operation.
+###2  
+We need quote around 1999 and 2000, because they are column name
+###3  
+There are 2 Phillip Woods with different ages. We need to add an identifier column
+```{r additional column}
+people <- tribble(
+  ~name,             ~key,    ~value, ~identifier,
+  #-----------------|--------|------|------
+  "Phillip Woods",   "age",       45, 1,
+  "Phillip Woods",   "height",   186, 1,
+  "Phillip Woods",   "age",       50, 2,
+  "Jessica Cordero", "age",       37, 1,
+  "Jessica Cordero", "height",   156, 1
+)
+spread(people, key, value)
+```
+###4
+We should use gather here:
+
+```{r gather}
+preg <- tribble(
+  ~pregnant, ~male, ~female,
+  "yes",     NA,    10,
+  "no",      20,    12
+)
+gather(preg, sex, count, male, female) %>%
+  mutate(pregnant = pregnant == "yes",
+         female = sex == "female") %>%
+  select(pregnant, count, female)
+```
+  
+##12.4.3  
+###1  
+Extra dictate what to do when there are too much data in 1 location, fill dictate what to do when there are missing data
+###2  
+Setting it to false will create new variable and keep the old one
+###3  
+Extract use regex to split columns, separate have multiple different way to split a character string. Unite is much easier because putting thing together is less ambiguous than splitting them
+
+##12.5.1  
+###1  
+In spread, the fill argument specify what a value to replace NA, in complete, fill also specify this but it allow more variation across different variable
+###2  
+Up replace NA with next value, down replace NA with previous value
+
+##12.6.1  
+###1  
+Because there are 0 in the column, I believe that the 0 cases is accounted for and na.rm will not affect the study.
+
+###2
+```{r error}
+who1 <- who %>%
+  gather(new_sp_m014:newrel_f65, key = "key", value = "cases", na.rm = TRUE)
+glimpse(who1)
+who2 <- who1 %>%
+ mutate(key = stringr::str_replace(key, "newrel", "new_rel"))
+who3 <- who2 %>%
+  separate(key, c("new", "type", "sexage"), sep = "_")
+who3
+who3 %>%
+  count(new)
+who4 <- who3 %>%
+  select(-new, -iso2, -iso3)
+who5 <- who4 %>%
+  separate(sexage, c("sex", "age"), sep = 1)
+who5
+```
+
+We will get too few variable error  
+###3  
+```{r redundant}
+who3 <- who %>%
+  gather(new_sp_m014:newrel_f65, key = "key", value = "cases", na.rm = TRUE) %>%
+  mutate(key = stringr::str_replace(key, "newrel", "new_rel")) %>%
+  separate(key, c("new", "type", "sexage"), sep = "_")
+select(who3, country, iso2, iso3) %>%
+  distinct() %>%
+  group_by(country) %>%
+  filter(n()>1)
+```
+No data is repeated, hence we don't need both iso2 and iso3 with country.  
+##13.2.1  
+###1  
+Path: combining origin and dest
+Airport_location: combining longitude and latitude. Then we merge location into path  
+###2
+Origin in weather should track with faa in airpoint (same location)  
+###3
+year, month, day, hour, origin in weather should match with year, month, day, hour, faa in airport  
+###4
+Since this require special representation, we should add a column for special date and it should match the month, day and year in flights  
+##13.3.1  
+###1
+```{r surrogate key}
+flights %>% 
+  arrange(year, month, day, sched_dep_time, carrier, flight) %>%
+  mutate(row_number = row_number()) %>%
+  glimpse()
+```
+  
+###2  
+```{r lahman}
+Lahman::Batting
+#Primary Key: playerId, yearID
+babynames::babynames
+#Primary Key: year, sex, name
+nasaweather::atmos
+#Primary Key: lat, long, year, month
+fueleconomy::vehicles
+#Primary Key: id
+ggplot2::diamonds
+#Primary Key: There is no unique key combination for this one
+```
+  
+###3
+See mutating_joins.xml on github  
+
+##13.4.6  
+###1  
+```{r delay}
+flights %>%
+  group_by(dest) %>%
+  summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+  inner_join(airports, by = c(dest = "faa")) %>%
+  ggplot(aes(lon, lat, colour = delay)) +
+    borders("state") +
+    geom_point() +
+    coord_quickmap()
+```
+  
+###2  
+```{r add location}
+flights %>%
+  left_join(airports, by = c(dest = "faa")) %>%
+  left_join(airports, by = c(origin = "faa"))
+```
+
+###3  
+There doesn't seems to be a relation, if anything it is trending down with age, which make no sense at all
+
+```{r old planes}
+plane_age <-
+  planes %>%
+  mutate(age = 2013 - year) %>%
+  select(tailnum, age)
+flights %>%
+  inner_join(plane_age, by = "tailnum") %>%
+  group_by(age) %>%
+  filter(!is.na(dep_delay)) %>%
+  summarise(delay = mean(dep_delay)) %>%
+  ggplot(aes(x = age, y = delay)) +
+  geom_line()
+```
+
+###4
+I am guessing precipitation cause more delay than usual
+
+```{r precipitation}
+flights %>%
+  inner_join(weather, by = c("origin" = "origin",
+                            "year" = "year",
+                            "month" = "month",
+                            "day" = "day",
+                            "hour" = "hour")) %>%
+  group_by(precip) %>%
+  summarise(delay = mean(dep_delay, na.rm = TRUE)) %>%
+  ggplot(aes(x = precip, y = delay)) +
+    geom_line()
+```
+  
+###5  
+```{r storm}
+flights %>%
+  filter(year == 2013, month == 6, day == 13) %>%
+  group_by(dest) %>%
+  summarise(delay = mean(arr_delay, na.rm = TRUE)) %>%
+  inner_join(airports, by = c("dest" = "faa")) %>%
+  ggplot(aes(y = lat, x = lon, size = delay, colour = delay)) +
+  borders("state") +
+  geom_point() +
+  coord_quickmap()
+```
+
+Seems like there is a storm a bit west of Carolinas
+  
+##13.5.1
+###1  
+Some airline does not report tailnum
+###2  
+```{r filter}
+flights%>%
+  group_by(tailnum)%>%
+  count() %>%
+  filter(n > 100)
+```
+###3  
+```{r combine}
+fueleconomy::vehicles %>%
+  semi_join(fueleconomy::common, by = c("make", "model"))
+```
+###4
+The worse delays should correspond with stormy weather, I am not sure how to gather all the storm period to compare this to
+###5
+anti_join(flights, airports, by = c("dest" = "faa")) tells me about flight that have destination not listed  
+anti_join(airports, flights, by = c("faa" = "dest")) tells me about the airports that is not connected to NYC in 2013 
+###6  
+There might be multiple airline using the same plane
+```{r distinct planes}
+flights %>%
+  group_by(tailnum, carrier) %>%
+  count()
+```
+
