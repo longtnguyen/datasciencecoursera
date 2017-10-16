@@ -1,0 +1,57 @@
+---
+title: "r4ds_wrangle_exercises_14-15"
+author: "Long Nguyen"
+date: "10/16/2017"
+output: html_document
+---
+
+##14.2.5  
+###1  
+The function paste() separate string with space, paste0() does not. paste0() behave like str_c() but str_c() does not put NA together with string like paste0 does; it will just display NA.
+###2  
+sep is what get insert in between arguments of str_c when it is put together. collapse is what used to combines input vector into a single string (like comma)  
+###3  
+```{r string}
+library(stringr)
+string <- "abcdef"
+len <- str_length(string)
+mid <- ceiling(len/2)
+str_sub(string, mid, mid)
+```
+###4  
+str_wrap() add linebreak after certain number of character
+###5  
+str_trim() get rid of whitespace in a string
+###6  
+```{r funtion}
+func <- function(str, comma = ", ", and = ", and ") {
+  if( length(str) > 1) {
+    str_c(str_c(str[-length(str)], collapse = comma), str[length(str)], sep = and)
+  } else {
+    str
+  }
+}
+func(c("a", "b", "c"))
+```
+##14.3.1.1  
+###1  
+\ will escape next character, which is nothing so nothing get display
+\\ the first \ escape to show the second \ but the second \ is to escape for regular expression.
+\\\ similar to the above, the second \ will escape for regular expression, the third one only escape the next character, we need 1 more if we want to display \ 
+###2  
+```{r match}
+x<-"\"'\\"
+writeLines(x)
+str_view(x,'"\\\'\\\\')
+```
+###3  
+it would match ".a.b.c"  
+##14.3.2.1  
+```{r literal string}
+str_view(c("$^$", "ab$^$sfas"), "^\\$\\^\\$$")
+```
+##14.3.3.1  
+##14.4.2  
+##14.4.6.1  
+##15.4.1  
+##15.5.1
