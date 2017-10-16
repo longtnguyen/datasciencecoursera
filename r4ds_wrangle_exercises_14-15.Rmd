@@ -2,9 +2,16 @@
 title: "r4ds_wrangle_exercises_14-15"
 author: "Long Nguyen"
 date: "10/16/2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
+  word_document: default
 ---
-
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+install.packages("htmlwidgets")
+library(stringr)
+```
 ##14.2.5  
 ###1  
 The function paste() separate string with space, paste0() does not. paste0() behave like str_c() but str_c() does not put NA together with string like paste0 does; it will just display NA.
@@ -12,7 +19,6 @@ The function paste() separate string with space, paste0() does not. paste0() beh
 sep is what get insert in between arguments of str_c when it is put together. collapse is what used to combines input vector into a single string (like comma)  
 ###3  
 ```{r string}
-library(stringr)
 string <- "abcdef"
 len <- str_length(string)
 mid <- ceiling(len/2)
@@ -47,11 +53,65 @@ str_view(x,'"\\\'\\\\')
 ###3  
 it would match ".a.b.c"  
 ##14.3.2.1  
+###1  
 ```{r literal string}
-str_view(c("$^$", "ab$^$sfas"), "^\\$\\^\\$$")
+str_view("$^$", "^\\$\\^\\$$")
 ```
+###2  
+- ^y
+- x$
+- .{3}
+- .{7,}
 ##14.3.3.1  
+###1  
+- "^[aeiou]"
+- I am not sure about this one
+- "^ed$|[^e]ed$"
+- "i(ng|se)$"
+###2  
+```{r i before e}
+sum(str_detect(stringr::words, "(cei|[^c]ie)"))
+sum(str_detect(stringr::words, "(cie|[^c]ei)"))
+```
+###3  
+```{r q u}
+sum(str_detect(stringr::words, "q[^u]"))
+```
+###4  
+I only know colour/color and finalize/finalise
+- "ou|ise^"
+
+###5  
+- "\\(\\d{3}\\)\\d{3}-\\d{4}"
 ##14.4.2  
+###1  
+```{r str_detect}
+#start or end with x
+stringr::words[str_detect(words, "^x|x$")]
+stringr::words[str_detect(words, "^x")|str_detect(words, "x$")]
+#Find all words that start with a vowel and end with a consonant.
+stringr::words[str_detect(words, "^[aeiou].*[^aeiou]$")]
+stringr::words[str_detect(words, "^[aeiou]") & str_detect(words, "[^aeiou]$")]
+#Are there any words that contain at least one of each different vowel?
+stringr::words[str_detect(words, "a") & str_detect(words, "e") & str_detect(words, "i") & str_detect(words, "o") & str_detect(words, "u")]
+```
+###2
+I am not sure about most vowel, but proportionally, 'a' has 100% and should be highest
 ##14.4.6.1  
+###1  
+```{r split}
+str_split(c("apples, pears, and bananas"), ", +(and +)?")[[1]]
+```
+###2  
+boundary("word") also split on punctuation
+###3  
+```{r split empty string}
+str_split("abc def", "")[[1]]
+```
 ##15.4.1  
-##15.5.1
+###1  
+Depends on if we care about these outlier value or not, the mean might be a decent metric. 
+###2  
+Marital and race are principal, the rest seems arbitrary
+###3  
+Because Not applicable got assign a value of 0
