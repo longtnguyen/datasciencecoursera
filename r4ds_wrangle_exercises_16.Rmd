@@ -1,0 +1,134 @@
+---
+title: "Untitled"
+author: "Long Nguyen"
+date: "10/22/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+library(nycflights13)
+make_datetime_100 <- function(year, month, day, time) {
+  make_datetime(year, month, day, time %/% 100, time %% 100)
+}
+flights_dt <- flights %>% 
+  filter(!is.na(dep_time), !is.na(arr_time)) %>% 
+  mutate(
+    dep_time = make_datetime_100(year, month, day, dep_time),
+    arr_time = make_datetime_100(year, month, day, arr_time),
+    sched_dep_time = make_datetime_100(year, month, day, sched_dep_time),
+    sched_arr_time = make_datetime_100(year, month, day, sched_arr_time)
+  ) %>% 
+  select(origin, dest, ends_with("delay"), ends_with("time"))
+```
+##16.2.4  
+###1  
+```{r invalid string}
+ymd(c("2010-10-10", "bananas"))
+```
+we get an error fail to parse
+
+###2  
+tzone tell us what time zone the date is in, otherwise we will have today() giving different date even though it is called at the same moment.
+
+###3  
+```{r parse date}
+d1 <- "January 1, 2010"
+d2 <- "2015-Mar-07"
+d3 <- "06-Jun-2017"
+d4 <- c("August 19 (2015)", "July 1 (2015)")
+d5 <- "12/30/14" # Dec 30, 2014
+
+mdy(d1)
+ymd(d2)
+dmy(d3)
+mdy(d4)
+mdy(d5)
+```
+
+##16.3.4  
+###1  
+```{r departure time between dates}
+flights_dt %>%
+  mutate(time = hour(dep_time) * 100 + minute(dep_time),
+         week = as.factor(week(dep_time))) %>%
+  ggplot(aes(x = time, group = week, color = week)) +
+  geom_freqpoly(binwidth = 100)
+```
+Using the departure time within the day graph, I don't see any deviation between dates, except for week 53, I guess no one want to fly much between christmas and new year
+
+###2  
+```{r compare dep_time}
+flights_dt %>%
+  mutate(dep_time2 = sched_dep_time + dep_delay * 60) %>%
+  filter(dep_time2 != dep_time) %>%
+  select(dep_time2, dep_time, sched_dep_time, dep_delay)
+```
+dep_time2 is sched_dep_time + dep_delay. If they are consistent, this would be the same number. But the date is off by 1. I think these are flight that delay over night. dep_time doesn't account for this, hence the inconsistency
+
+###3  
+```{r airtime}
+flights_dt %>%
+  mutate(flight_duration = as.numeric(arr_time - dep_time),
+         air_time) %>%
+  select(origin, dest, flight_duration, air_time)
+```
+I think this is caused by flying to a different timezone, or fly overnight
+
+###4  
+```{r delay}
+flights_dt %>%
+  mutate(sched_dep = hour(sched_dep_time)) %>%
+  group_by(sched_dep) %>%
+  summarise(dep_delay = mean(dep_delay)) %>%
+  ggplot(aes(y = dep_delay, x = sched_dep)) +
+    geom_line()
+```
+I think earlier delay will compound the effect and cause more flight delay later in the day
+###5  
+```{r week delay}
+flights_dt %>%
+  mutate(weekday = wday(sched_dep_time)) %>%
+  group_by(weekday) %>%
+  summarise(arr_delay = mean(arr_delay, na.rm = TRUE))
+```
+Saturday is clearly the winner here, arrive earlier on average
+
+###6  
+```{r diamond and flights}
+ggplot(diamonds, aes(x = carat)) + 
+  geom_density()
+ggplot(flights_dt, aes(minute(sched_dep_time))) + 
+  geom_density()
+```
+I guess they peak at whole number, as most flight depart at 9:30, 10:00 same as diamond usually have whole number carat
+
+###7  
+I am not sure I understand this question, early departure by definition is cause by flight leaving early...
+
+##16.4.5  
+###1  
+Because each month may have different date, dmonth() won't make much sense since it can give different number depends on which month is included
+
+###2  
+overnight indicate if the flight is overnight. It return true if it is, and false if it isn't. This is useful to calculate arrival time of a flight
+
+###3  
+```{r month}
+ymd("2015-01-01") + months(0:11)
+ymd("2017-01-01") + months(0:11)
+```
+###4  
+```{r birthday}
+age <- function(birthday) {
+  (birthday %--% today()) %/% years(1)
+}
+age(mdy("2-11-1987"))
+```
+###5  
+```{r day}
+(today() %--% (today() + years(1)) / months(1))
+```
+This will always return 12, because we add a year and divide by 1 month. I am not sure what this suppose to do in the first place to fix it.
