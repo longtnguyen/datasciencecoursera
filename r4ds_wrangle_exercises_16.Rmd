@@ -87,6 +87,7 @@ flights_dt %>%
     geom_line()
 ```
 I think earlier delay will compound the effect and cause more flight delay later in the day
+
 ###5  
 ```{r week delay}
 flights_dt %>%
@@ -120,6 +121,7 @@ overnight indicate if the flight is overnight. It return true if it is, and fals
 ymd("2015-01-01") + months(0:11)
 ymd("2017-01-01") + months(0:11)
 ```
+
 ###4  
 ```{r birthday}
 age <- function(birthday) {
@@ -127,6 +129,7 @@ age <- function(birthday) {
 }
 age(mdy("2-11-1987"))
 ```
+
 ###5  
 ```{r day}
 (today() %--% (today() + years(1)) / months(1))
