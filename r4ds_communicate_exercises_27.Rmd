@@ -1,0 +1,77 @@
+---
+title: "Untitled"
+author: "Long Nguyen"
+date: "10/30/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(scales)
+```
+
+## 27.2.1  
+### 1   
+### 2   
+### 3   
+Both can run R-script
+R notebook cannot knit like R markdown
+### 4   
+I think the only different is file output and how the file is format, pdf have margin, html doesn't have the same margin
+
+## 27.3.1  
+### 1   
+
+#### Long Nguyen
+Long Nguyen 
+caycham1@gmail.com  
+
+##### Education  
+ * California Institute of Technology
+ * B.S. Mechanical Engineering
+
+##### Work Experience  
+  * Red Ventures Software Engineer
+  * 2016-Present
+  * Build CLI tool for Atom platform
+  * Add logging functionality to track errors
+
+### 2  
+ [^1]: Here is the footnote.
+***  
+> block quote
+
+### 3  
+
+## 27.4.7  
+### 1  
+```{r}
+knitr::kable(diamonds %>% 
+  group_by(cut) %>% 
+  summarise(avg_carat = mean(carat)))
+knitr::kable(diamonds %>% 
+  group_by(color) %>% 
+  summarise(avg_carat = mean(carat)))
+knitr::kable(diamonds %>% 
+  group_by(clarity) %>% 
+  summarise(avg_carat = mean(carat)))
+
+```
+### 2   
+```{r}
+knitr::kable(diamonds %>% 
+  arrange(desc(carat)) %>% 
+  top_n(20))
+```
+
+### 3  
+```{r}
+total <- diamonds %>%
+  count()
+bigger <- diamonds %>% 
+  filter(carat >= 2.5) %>% 
+  count()
+pct <- bigger / total
+paste(pct)
+```
