@@ -41,7 +41,7 @@ caycham1@gmail.com
   * Add logging functionality to track errors
 
 ### 2  
-foooooootttttnoooooooottteeeee [^1]
+foooooootttttnoooooooottteeeee [^1]  
 [^1]: Here is the footnote.  
 ***  
 > block quote
