@@ -1,0 +1,164 @@
+---
+title: "r4ds_communicate_exercises_28"
+author: "Long Nguyen"
+date: "11/6/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(lubridate)
+```
+
+##28.2.1  
+###1  
+```{r labels}
+ggplot(data = mpg,
+       mapping = aes(x = reorder(class, hwy, median), y = hwy)) + 
+  geom_boxplot() +
+  coord_flip() +
+  labs(
+    title = "Fuel milage of each car class",
+    subtitle = "Compare using highway mpg",
+    caption = "fueleconomy.gov",
+    x = "Class",
+    y = "Highway mpg"
+  )
+```
+
+###2  
+```{r redo graph}
+small_car <- filter(mpg, class != "2seater")
+ggplot(mpg, aes(displ,hwy)) +
+  geom_point(aes(colour = class)) +
+  geom_smooth(data = small_car) +
+  labs(
+    title = "Fuel efficiency generally decreases with engine size",
+    subtitle = "Omitting 2 seater from best fit line",
+    caption = "Data from fueleconomy.gov"
+  )
+```
+###3  
+```{r add label}
+ggplot(data = mpg) + 
+  geom_point(mapping = aes(x = displ, y = hwy)) +
+  labs(
+    title = "Highway vs city fuel efficiency"
+  )
+
+```
+
+##28.3.1  
+###1  
+```{r infinite label}
+labels <- tibble(
+  x = c(-Inf, -Inf, Inf, Inf),
+  y = c(Inf, -Inf, Inf, -Inf),
+  lab = c("Top-Left", "Bottom-Left", "Top-Right", "Bottom-Right"),
+  v = c("top", "bottom", "top", "bottom"),
+  h = c("left", "left", "right", "right")
+)
+ggplot(data = mpg, aes(displ, hwy)) +
+  geom_point(aes(colour = class)) +
+  geom_text(aes(x = x, y = y, label = lab, vjust = v, hjust = h), data = labels)
+```
+
+###2  
+```{r annotate}
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  annotate("text", x = Inf, y = Inf, 
+           label = "label goes to the top right", vjust = "top", hjust = "right")
+```
+
+###3  
+```{r label individual facet}
+#add class property into the tibble
+label <- tibble(
+  displ = Inf,
+  hwy = Inf,
+  class = "suv",
+  label = "Engine size vs efficiency"
+)
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_text(aes(label = label), data = label, vjust = "top", hjust = "right", size = 2) +
+  facet_wrap(~ class)
+
+```
+
+```{r label each facet}
+label <- tibble(
+  displ = Inf,
+  hwy = Inf,
+  class = unique(mpg$class),
+  label = stringr::str_c("Engine size for ", class, " vs efficiency")
+)
+ggplot(mpg, aes(displ, hwy)) +
+  geom_point() +
+  geom_text(aes(label = label), data = label, vjust = "top", hjust = "right", size = 3) +
+  facet_wrap(~ class)
+
+```
+
+###4  
+label.padding, label.r, label.size
+
+###5  
+angle: angle of arrowhead
+length: length of the head
+end: end of the line to draw the arrow
+type: open or close, describe how to draw the arrow
+```{r arrow}
+ggplot(mpg, aes(displ, hwy, colour = class)) +
+  geom_point() +
+  geom_segment(
+    aes(x = 1, y = 40, xend = 6, yend = 27),
+    arrow = arrow(type = "closed")
+    #default is open
+  )
+ggplot(mpg, aes(displ, hwy, colour = class)) +
+  geom_point() +
+  geom_segment(
+    aes(x = 1, y = 40, xend = 6, yend = 27),
+    arrow = arrow(length = unit(2, "inches"), ends = "first")
+  )
+ggplot(mpg, aes(displ, hwy, colour = class)) +
+  geom_point() +
+  geom_segment(
+    aes(x = 1, y = 40, xend = 6, yend = 27),
+    arrow = arrow(ends = "both", angle = 15)
+  )
+```
+##28.4.4  
+###1  
+I think we need to use scale_fill_gradient instead of scale_colour_gradient
+
+###2  
+The first argument is the label, it is the same as the labs() function
+
+###3  
+```{r president}
+library(lubridate)
+presidential %>%
+  mutate(id = 33 + row_number()) %>%
+  ggplot(aes(start, id, colour = party)) +
+    geom_point() +
+    geom_segment(aes(xend = end, yend = id)) +
+    scale_x_date(NULL, breaks = presidential$start, date_labels = "%y") +
+    scale_y_continuous("President", labels = presidential$name, breaks = seq(34, 44, by = 1)) +
+    scale_colour_manual(values = c(Republican = "red", Democratic = "blue")) +
+  labs(
+    title = "US President term",
+    color = "Party"
+  )
+
+```
+
+###4  
+```{r override}
+ggplot(diamonds, aes(carat, price)) +
+  geom_point(aes(colour = cut), alpha = 1/20) +
+  guides(colour = guide_legend(override.aes = list(alpha = .5)))  
+```
