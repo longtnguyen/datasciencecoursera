@@ -16,3 +16,5 @@ ggplot(combined_NEI, aes(factor(year), Emissions/1000)) +
   labs(title=expression("Baltimore/LA PM2.5 Vehicle Emissions from 1999-2008"))
 
 dev.off()
+
+# Emission in LA from vehicle is an order of magnitude more than Baltimore, and this has not show a downward trending like what we saw in Baltimore in this period

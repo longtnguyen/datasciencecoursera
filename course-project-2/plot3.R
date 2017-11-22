@@ -15,3 +15,5 @@ ggplot(baltimore_NEI,aes(factor(year),Emissions/1000,fill=type)) +
   labs(title=expression("PM2.5 Emissions by Type, Baltimore 1999-2008"))
 
 dev.off()
+
+# Only Point seems to have increase from 1999 to 2008

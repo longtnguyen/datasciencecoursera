@@ -11,3 +11,5 @@ ggplot(NEI_coal,aes(factor(year),Emissions/10^6)) +
   labs(title=expression("US Total PM2.5 Coal Emissions from 1999-2008"))
 
 dev.off()
+
+# Coal emission seems to be decreasing

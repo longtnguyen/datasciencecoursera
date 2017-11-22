@@ -14,3 +14,5 @@ ggplot(baltimore_vehicles_NEI,aes(factor(year),Emissions/1000)) +
   labs(title=expression("Baltimore PM2.5 Motor Vehicle Emissions from 1999-2008"))
 
 dev.off()
+
+# Baltimore vehicle emission seems to be trending downward for those 9 years period
