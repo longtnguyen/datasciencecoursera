@@ -4,7 +4,7 @@ library(ggplot2)
 png("plot3.png", width=480, height=480, units="px")
 
 # Convert year to Date() format so it is less clutter
-# baltimoreNEI$year <- baltimoreNEI$year %% 100
+# baltimore_NEI$year <- baltimore_NEI$year %% 100
 # This did not turn out as well as I hope, I will revisit this later
 
 ggplot(baltimore_NEI,aes(factor(year),Emissions/1000,fill=type)) +
